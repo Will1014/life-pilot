@@ -9,14 +9,14 @@ npm run serve
 npm test
 ```
 
-Game rules live in `src/game.js` and `src/life.js`, which must not touch the
+Game rules live in `src/game.js` and `src/universe.js`, which must not touch the
 DOM, so every mechanic can be tested under Node. Browser code stays in
 `src/main.js`.
 
 ## Versioning
 
 Semantic versioning. MAJOR for a change to how the game plays that breaks
-comparability of scores, MINOR for new features, PATCH for fixes.
+how a saved setup behaves, MINOR for new features, PATCH for fixes.
 
 ## Releasing
 

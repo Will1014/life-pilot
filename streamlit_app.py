@@ -1,7 +1,7 @@
 """Serve Life Pilot inside Streamlit.
 
 Streamlit embeds HTML in a sandboxed frame that cannot fetch the separate
-module files, so the three modules are inlined into one script. The game
+module files, so the modules are inlined into one script. The game
 itself is unchanged; index.html still works on any static host.
 """
 
@@ -11,7 +11,7 @@ from pathlib import Path
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parent
-MODULES = ["src/life.js", "src/game.js", "src/main.js"]  # dependency order
+MODULES = ["src/universe.js", "src/game.js", "src/main.js"]  # dependency order
 SCRIPT_TAG = '<script type="module" src="src/main.js"></script>'
 
 

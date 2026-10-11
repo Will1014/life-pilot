@@ -5,33 +5,56 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Life Pilot</title>
   <style>
-    :root { --bg: #0b0d12; --cell: #9bd17a; --ink: #e8e6df; --dim: #7d8590; --hull: #e4572e; --energy: #4fa3d1; }
+    :root { --bg: #0b0d12; --species: #9bd17a; --ground: #7a6438; --ship: #e4572e;
+      --ink: #e8e6df; --dim: #7d8590; --line: #2c333d; --panel: rgba(17, 20, 27, 0.92); }
     html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
-      font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: hidden; }
+      font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: hidden; }
     canvas#view { display: block; }
+    #hud, #help { background: var(--panel); border: 1px solid var(--line); padding: 6px 8px; }
     #hud { position: fixed; top: 12px; left: 12px; pointer-events: none; }
-    .bar { width: 160px; height: 8px; background: #222831; margin: 3px 0 8px; }
-    .bar > div { height: 100%; }
-    #minimap { position: fixed; top: 12px; right: 12px; border: 1px solid #2c333d;
-      image-rendering: pixelated; width: 192px; height: 192px; }
-    #help { position: fixed; bottom: 12px; left: 12px; color: var(--dim); }
-    #over { position: fixed; inset: 0; display: none; place-items: center; text-align: center;
-      background: rgba(11, 13, 18, 0.78); }
-    #over h1 { margin: 0 0 8px; font-size: 32px; }
+    #minimap { position: fixed; top: 12px; right: 12px; border: 1px solid var(--line);
+      image-rendering: pixelated; width: 220px; }
+    #panel { position: fixed; right: 12px; bottom: 12px; width: 220px; padding: 10px;
+      background: var(--panel); border: 1px solid var(--line); }
+    #panel label { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 0 0 6px; }
+    #panel input, #panel select { width: 92px; background: var(--bg); color: var(--ink);
+      border: 1px solid var(--line); font: inherit; }
+    #panel button { width: 100%; margin-top: 4px; background: var(--line); color: var(--ink);
+      border: 0; padding: 5px; font: inherit; cursor: pointer; }
+    #panel .note { color: var(--dim); margin: 0 0 6px; }
+    #help { position: fixed; bottom: 12px; left: 12px; color: var(--dim); max-width: calc(100% - 270px); }
   </style>
 </head>
 <body>
   <canvas id="view"></canvas>
   <canvas id="minimap" width="256" height="256"></canvas>
-  <div id="hud">
-    <div>Hull</div><div class="bar"><div id="hull" style="background: var(--hull)"></div></div>
-    <div>Energy</div><div class="bar"><div id="energy" style="background: var(--energy)"></div></div>
-    <div id="stats"></div>
-  </div>
+  <div id="hud"><div id="stats"></div></div>
+  <form id="panel">
+    <label>Rule <select id="rule">
+      <option value="consumer">Consumer-resource</option>
+      <option value="random">Random tables</option>
+      <option value="conway">Conway's Life</option>
+    </select></label>
+    <label>Lattice <select id="lattice">
+      <option value="hex">Hexagonal</option>
+      <option value="square8">Square (8)</option>
+      <option value="square4">Square (4)</option>
+    </select></label>
+    <label data-for="consumer random">Ground levels <input id="ke" type="number" min="2" max="6" value="3"></label>
+    <label data-for="consumer random">Ground updates every <input id="envPeriod" type="number" min="1" max="10" value="1"></label>
+    <label data-for="consumer">Colonise at <input id="coloniseAt" type="number" min="1" value="2"></label>
+    <label data-for="consumer">Regrow at <input id="regrowAt" type="number" min="0" value="1"></label>
+    <label data-for="random">Rule seed <input id="ruleSeed" type="number" min="0" value="0"></label>
+    <p class="note" data-for="random">Rule seeds here do not match the Python app's.</p>
+    <p class="note" data-for="conway">Conway's Life runs on the square (8) lattice only.</p>
+    <label>Starting occupancy <input id="occupancy" type="number" min="0" max="1" step="0.01" value="0.05"></label>
+    <label>World seed <input id="seed" type="number" min="0" value="1"></label>
+    <button>Build universe</button>
+  </form>
   <div id="help">
-    ← → turn · ↑ thrust · Space fire glider · Shift plough · +/− Life speed · P pause · M map · R restart
+    ← → turn · ↑ thrust · ↓ brake · 1-5 ship speed · +/− generations per second ·
+    P pause · M map · H panel · R rebuild
   </div>
-  <div id="over"><div><h1>Hull breached</h1><div id="final"></div><p>Press R to fly again</p></div></div>
   <script type="module" src="src/main.js"></script>
 </body>
 </html>

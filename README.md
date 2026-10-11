@@ -1,10 +1,13 @@
 # Life Pilot
 
-Pilot a ship through Conway's Game of Life. The grid reacts to how you fly:
-your exhaust seeds new life, gliders you fire reshape the field, and
-ploughing through cells clears a path at a cost. Survive and explore.
+Fly a ship through cellular automaton universes and watch them run. Each
+universe is two layers on one lattice, a species and the ground it lives on,
+and each layer steps by looking itself up in a rule table. The ship is a
+viewer only. It cannot be harmed and it never touches either layer.
 
-An offshoot of [cellular-automata](https://github.com/Will1014/cellular-automata).
+The companion to [cellular-automata](https://github.com/Will1014/cellular-automata),
+where the two-layer model is built and studied. The game's engine is checked
+step for step against that model's `coupled.py`.
 
 ## Play
 
@@ -25,22 +28,26 @@ streamlit run streamlit_app.py
 | Key | Action |
 | --- | --- |
 | ← → (or A D) | Turn |
-| ↑ (or W) | Thrust. The exhaust seeds live cells in your wake |
-| Space | Fire a glider along the nearest diagonal. Costs energy |
-| Shift | Plough: erase cells you touch instead of taking damage. Costs energy |
-| + / − | Life speed, 2 to 30 generations per second |
-| P, M, R | Pause, toggle map, restart |
+| ↑ (or W) | Thrust |
+| ↓ (or S) | Brake |
+| 1-5 | Ship speed, 8 to 180 cells per second |
+| + / − | Generations per second, 1 to 60 |
+| P, M, H, R | Pause the universe, toggle map, toggle panel, rebuild |
 
-Live cells under the hull cost hull points each generation. Energy
-regenerates. Score is seconds survived plus 25 per new 32×32 sector explored.
+The panel builds a new universe: consumer-resource, random tables or Conway's
+Life, on a hexagonal or square lattice, with the number of ground levels, how
+often the ground updates, starting occupancy and seeds. Random rule seeds
+use the game's own generator, so they do not reproduce the same seed in the
+Python app.
 
 ## Module map
 
 | File | Purpose |
 | --- | --- |
-| `src/life.js` | Life on a torus, patterns, glider orientation, seeded RNG |
-| `src/game.js` | Ship physics and the four mechanics, browser-free and tested |
-| `src/main.js` | Keyboard, frame loop, drawing, HUD, minimap |
+| `src/universe.js` | Lattices, rule tables, the two-layer step, plane geometry, seeded RNG |
+| `src/game.js` | Ship physics and the generation clock, browser-free and tested |
+| `src/main.js` | Keyboard, universe panel, frame loop, drawing, HUD, minimap |
+| `tools/make_parity_fixture.py` | Records runs from `coupled.py` for the parity tests |
 | `streamlit_app.py` | Streamlit wrapper that inlines the modules into one page |
 
 ## Tests
@@ -49,8 +56,13 @@ regenerates. Score is seconds survived plus 25 per new 32×32 sector explored.
 npm test
 ```
 
+`tests/fixtures/parity.json` holds short runs recorded from the Python model.
+Regenerate it with `python tools/make_parity_fixture.py` (needs the
+cellular-automata package installed) whenever `coupled.py` changes.
+
 ## Known limitations
 
 - Keyboard only; no touch controls yet.
-- Balance (damage, energy costs, soup density) is a first pass.
+- Rules are built in the panel. Loading a rule file exported from
+  cellular-automata is planned, not built.
 - The world is 256 × 256 cells and wraps at the edges.

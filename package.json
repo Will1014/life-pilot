@@ -1,7 +1,7 @@
 {
   "name": "life-pilot",
   "version": "0.1.0",
-  "description": "Pilot a ship through Conway's Game of Life. The grid reacts to how you fly.",
+  "description": "Fly a ship through two-layer cellular automaton universes and watch them run.",
   "type": "module",
   "private": true,
   "license": "MIT",

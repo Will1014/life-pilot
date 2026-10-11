@@ -6,6 +6,22 @@ semantic versioning as described in CONTRIBUTING.md.
 
 ## [Unreleased]
 
+### Changed
+- The ship is now an explorer only: no hull, energy, exhaust, gliders,
+  plough or score. It cannot be harmed and does not affect the universe.
+- The world is a two-layer universe (species and ground) stepped by rule
+  tables, in place of Conway's Life alone. Conway's Life remains as one rule.
+
+### Added
+- Hexagonal lattice, alongside square (8) and square (4).
+- Consumer-resource and random-table rules, with a panel to build universes.
+- Five ship speed settings and a brake.
+- Parity tests that replay runs recorded from cellular-automata's `coupled.py`.
+
+### Removed
+- `src/life.js`, replaced by `src/universe.js`.
+
+
 ### Added
 - Life on a 256 × 256 torus with a seeded soup and a clear start area.
 - Ship with turn, thrust, drag and wrap-around.

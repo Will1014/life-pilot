@@ -1,84 +1,51 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { createGame, fireGlider, hullCells, score, tick, updateShip } from "../src/game.js";
-import { createGrid, get, population, set } from "../src/life.js";
+import { SHIP, createGame, setSpeed, tick, updateShip } from "../src/game.js";
+import { consumerResource, createUniverse, stepUniverse } from "../src/universe.js";
 
-const IDLE = { left: false, right: false, thrust: false, plough: false, fire: false };
+const IDLE = { left: false, right: false, thrust: false, brake: false };
+const CONFIG = { lattice: "hex", rule: consumerResource(3, 6, 2, 1), w: 64, h: 64, occupancy: 0.05, seed: 2 };
 
-function emptyGame() {
-  const game = createGame(1);
-  game.world = createGrid(game.settings.worldW, game.settings.worldH);
-  game.spare = createGrid(game.settings.worldW, game.settings.worldH);
-  return game;
-}
-
-test("start area is clear so the ship is not hit on spawn", () => {
-  const game = createGame(7);
-  for (const [x, y] of hullCells(game)) assert.equal(get(game.world, x, y), 0);
-});
+const fly = (game, input, seconds) => {
+  for (let i = 0; i < seconds * 60; i++) updateShip(game, input, 1 / 60);
+};
 
 test("thrust moves the ship along its heading", () => {
-  const game = emptyGame();
+  const game = createGame(CONFIG);
   const y0 = game.ship.y;
-  for (let i = 0; i < 60; i++) updateShip(game, { ...IDLE, thrust: true }, 1 / 60);
-  assert.ok(game.ship.y < y0 - 1, "ship starts pointing up, so y should fall");
+  fly(game, { ...IDLE, thrust: true }, 0.2);
+  assert.ok(game.ship.y < y0 - 0.5, "ship starts pointing up, so y should fall");
 });
 
-test("exhaust seeds live cells behind the ship", () => {
-  const game = emptyGame();
-  game.settings = { ...game.settings, exhaustPerTick: 20 };
-  tick(game, { ...IDLE, thrust: true });
-  assert.ok(population(game.world) > 0, "the wake should leave life behind");
-  const below = [...Array(8).keys()].some((d) =>
-    [-1, 0, 1].some((dx) => get(game.world, Math.floor(game.ship.x) + dx, Math.floor(game.ship.y) + 2 + d)));
-  assert.ok(below, "ship points up, so its wake is below it");
+test("each speed setting caps the ship at its own top speed", () => {
+  for (let s = 0; s < SHIP.speeds.length; s++) {
+    const game = createGame(CONFIG);
+    setSpeed(game, s);
+    fly(game, { ...IDLE, thrust: true }, 3);
+    const speed = Math.hypot(game.ship.vx, game.ship.vy);
+    assert.ok(Math.abs(speed - SHIP.speeds[s]) < 1e-6, `setting ${s + 1}: ${speed}`);
+  }
 });
 
-test("touching live cells damages the hull", () => {
-  const game = emptyGame();
-  const x = Math.floor(game.ship.x);
-  const y = Math.floor(game.ship.y);
-  // A block is stable, so it is still there after the Life step.
-  for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) set(game.world, x + dx, y + dy, 1);
-  tick(game, IDLE);
-  assert.ok(game.hull < game.settings.maxHull);
+test("the brake stops the ship faster than drag alone", () => {
+  const coast = createGame(CONFIG);
+  const brake = createGame(CONFIG);
+  for (const g of [coast, brake]) { setSpeed(g, 4); fly(g, { ...IDLE, thrust: true }, 2); }
+  fly(coast, IDLE, 0.5);
+  fly(brake, { ...IDLE, brake: true }, 0.5);
+  assert.ok(Math.hypot(brake.ship.vx, brake.ship.vy) < Math.hypot(coast.ship.vx, coast.ship.vy) / 3);
 });
 
-test("ploughing erases cells for energy instead of taking damage", () => {
-  const game = emptyGame();
-  const x = Math.floor(game.ship.x);
-  const y = Math.floor(game.ship.y);
-  for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) set(game.world, x + dx, y + dy, 1);
-  tick(game, { ...IDLE, plough: true });
-  assert.equal(game.hull, game.settings.maxHull);
-  assert.ok(game.energy < game.settings.maxEnergy);
-  for (const [cx, cy] of hullCells(game)) assert.equal(get(game.world, cx, cy), 0);
-});
-
-test("firing a glider stamps five cells, costs energy and respects cooldown", () => {
-  const game = emptyGame();
-  assert.equal(fireGlider(game), true);
-  assert.equal(population(game.world), 5);
-  assert.equal(game.energy, game.settings.maxEnergy - game.settings.gliderCost);
-  assert.equal(fireGlider(game), false, "cooldown blocks an immediate second shot");
-});
-
-test("hull reaching zero ends the run", () => {
-  const game = emptyGame();
-  game.hull = 1;
-  const x = Math.floor(game.ship.x);
-  const y = Math.floor(game.ship.y);
-  for (const [dx, dy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) set(game.world, x + dx, y + dy, 1);
-  tick(game, IDLE);
-  assert.equal(game.alive, false);
-});
-
-test("exploring new sectors raises the score", () => {
-  const game = emptyGame();
-  const before = score(game);
-  game.ship.vx = game.settings.maxSpeed;
-  for (let i = 0; i < 300; i++) updateShip(game, IDLE, 1 / 60);
-  assert.ok(game.sectors.size > 1);
-  assert.ok(score(game) > before);
+test("the ship has no effect on the universe", () => {
+  const game = createGame(CONFIG);
+  const alone = createUniverse(CONFIG);
+  setSpeed(game, 4);
+  for (let gen = 0; gen < 40; gen++) {
+    fly(game, { ...IDLE, thrust: true, left: gen % 3 === 0, brake: gen % 7 === 0 }, 0.1);
+    tick(game);
+    stepUniverse(alone);
+  }
+  assert.deepEqual(game.universe.species, alone.species);
+  assert.deepEqual(game.universe.env, alone.env);
 });
