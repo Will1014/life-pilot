@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Life Pilot</title>
+  <style>
+    :root { --bg: #0b0d12; --cell: #9bd17a; --ink: #e8e6df; --dim: #7d8590; --hull: #e4572e; --energy: #4fa3d1; }
+    html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+      font: 14px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace; overflow: hidden; }
+    canvas#view { display: block; }
+    #hud { position: fixed; top: 12px; left: 12px; pointer-events: none; }
+    .bar { width: 160px; height: 8px; background: #222831; margin: 3px 0 8px; }
+    .bar > div { height: 100%; }
+    #minimap { position: fixed; top: 12px; right: 12px; border: 1px solid #2c333d;
+      image-rendering: pixelated; width: 192px; height: 192px; }
+    #help { position: fixed; bottom: 12px; left: 12px; color: var(--dim); }
+    #over { position: fixed; inset: 0; display: none; place-items: center; text-align: center;
+      background: rgba(11, 13, 18, 0.78); }
+    #over h1 { margin: 0 0 8px; font-size: 32px; }
+  </style>
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <canvas id="minimap" width="256" height="256"></canvas>
+  <div id="hud">
+    <div>Hull</div><div class="bar"><div id="hull" style="background: var(--hull)"></div></div>
+    <div>Energy</div><div class="bar"><div id="energy" style="background: var(--energy)"></div></div>
+    <div id="stats"></div>
+  </div>
+  <div id="help">
+    ← → turn · ↑ thrust · Space fire glider · Shift plough · +/− Life speed · P pause · M map · R restart
+  </div>
+  <div id="over"><div><h1>Hull breached</h1><div id="final"></div><p>Press R to fly again</p></div></div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "life-pilot",
+  "version": "0.1.0",
+  "description": "Pilot a ship through Conway's Game of Life. The grid reacts to how you fly.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "serve": "python3 -m http.server 8000"
+  }
+}
