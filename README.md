@@ -15,6 +15,13 @@ Open `index.html` through any static web server (ES modules do not load from
 npm run serve   # then open http://localhost:8000
 ```
 
+Or run it through Streamlit, which inlines the modules into one page:
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
 | Key | Action |
 | --- | --- |
 | ← → (or A D) | Turn |
@@ -34,6 +41,7 @@ regenerates. Score is seconds survived plus 25 per new 32×32 sector explored.
 | `src/life.js` | Life on a torus, patterns, glider orientation, seeded RNG |
 | `src/game.js` | Ship physics and the four mechanics, browser-free and tested |
 | `src/main.js` | Keyboard, frame loop, drawing, HUD, minimap |
+| `streamlit_app.py` | Streamlit wrapper that inlines the modules into one page |
 
 ## Tests
 

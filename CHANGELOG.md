@@ -12,4 +12,5 @@ semantic versioning as described in CONTRIBUTING.md.
 - Exhaust that seeds live cells, hull damage from live cells, gliders
   fired along the nearest diagonal, and ploughing that erases cells for energy.
 - Survival and exploration score, HUD, minimap, adjustable Life speed.
+- Streamlit wrapper (`streamlit_app.py`) for hosting on Streamlit Cloud.
 - Tests for Life correctness and each mechanic, run under Node.

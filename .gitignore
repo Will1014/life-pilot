@@ -3,3 +3,4 @@ node_modules/
 *conflicted copy*
 Icon?
 .env
+__pycache__/
